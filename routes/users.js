@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-
+var jwt = require('jsonwebtoken');
+var passport = require('passport');
 var userModel = require('../models/user.model');
 
 /* GET users listing. */
@@ -41,28 +42,28 @@ router.post('/register', (req, res) => {
 
 });
 
-router.post('/login', (req, res) => {
-  var user = req.body;
+router.post('/login', (req, res,next) => {  
 
-  userModel.getByUsername(user.username)
-    .then((data) => {
-      if (data.length > 0) { // đã tồn tại
-        if(user.password === data[0].password)
+  passport.authenticate('local', {session: false}, (err, user, info)=>{        
+    if(err || !user)
+    {         
+        return res.status(400).json({
+            message:'Something is not right',
+            user: user,
+        });
+    }
+
+    req.login(user, {session: false}, (err)=>{
+        if(err)
         {
-          res.json({message:'Login success',code: 2});
+            res.send(err);
         }
-        else
-        {
-          res.json({message:'Password wrong',code: 1});
-        }        
-      }
-      else {
-        res.json({message:'Username wrong',code: 0});
-      }
-    })
-    .catch((error) => {
-      res.end('Có lỗi');
+        
+        let payload = {id:user.loginUser.id};
+        const token = jwt.sign(payload,'1612018_TranQuocAnh');
+        return res.json({user,token,info});        
     });
+  })(req,next);
 });
 
 module.exports = router;
