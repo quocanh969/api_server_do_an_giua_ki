@@ -4,6 +4,9 @@ module.exports = {
     getAll:() => {
         return db.load('SELECT * FROM USERs');
     },
+    getByID:id => {
+        return db.load(`SELECT * FROM USERs WHERE id = '${id}'`);
+    },
     getByUsername:username => {
         return db.load(`SELECT * FROM USERs WHERE username = '${username}'`);
     },

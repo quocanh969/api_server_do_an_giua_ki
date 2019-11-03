@@ -33,3 +33,19 @@ passport.use(new LocalStrategy(
             });
     }
 ));
+
+passport.use(new JWTStrategy(
+    {
+        jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+        secretOrKey: '1612018_TranQuocAnh',
+    },
+    function (jwtPayload, cb){              
+        return userModel.getByID(jwtPayload.id)
+            .then(user=>{                
+                return cb(null, user,{message: 'Authorized', code: 1 });
+            })
+            .catch(err=>{                
+                return cb(err, null,{ message: 'Can not authorized', code: 0 });
+            });
+    }
+));
