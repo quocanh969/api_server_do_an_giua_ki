@@ -21,15 +21,15 @@ passport.use(new LocalStrategy(
                         return cb(null, { loginUser: data[0] }, { message: 'Logged in successfully', code: 2 });
                     }
                     else {
-                        cb(null, false, { message: 'Password wrong', code: 1 });
+                        cb(null, false, { message: 'Wrong password', code: 1 });
                     }
                 }
                 else {
-                    return cb(null, false, { message: 'Username wrong', code: 0 });
+                    return cb(null, false, { message: 'Wrong username', code: 0 });
                 }
             })
-            .catch((error) => {
-                return cb(err)
+            .catch((error) => {                
+                return cb(error)
             });
     }
 ));
