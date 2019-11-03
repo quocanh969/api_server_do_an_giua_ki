@@ -25,6 +25,10 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
+var io = require('socket.io')(server);
+var room = require('../models/room.model');
+
+
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
@@ -53,6 +57,64 @@ function normalizePort(val) {
 /**
  * Event listener for HTTP server "error" event.
  */
+
+ // Socket server
+var roomNumber = 0;
+var rooms = [
+  {
+    id:0,
+    P1ID:null,
+    P2ID:null,
+  }
+]
+
+io.on('connection', function(socket){  
+  console.log('Player connected',socket.id); // Kiểm tra có người kết nói
+
+  // Tham gia vào game
+  socket.on('joinGame', function(data){
+
+    if(rooms[roomNumber].P1ID === null)
+    {
+      rooms[roomNumber].P1ID = data.id;
+    }
+    else if( rooms[roomNumber].P2ID === null)
+    {
+      rooms[roomNumber].P2ID = data.id;
+    }
+    else
+    {
+      roomNumber++;
+      rooms.push(
+        {
+          id:roomNumber,
+          P1ID:null,
+          P2ID:null
+        }
+      );
+      rooms[roomNumber].P1ID = data.id;
+    }
+
+    
+    socket.join(rooms[roomNumber].id);
+    socket.broadcast.to(rooms[roomNumber].id).emit('player1', rooms[roomNumber].P1ID);
+    socket.emit('player2', rooms[roomNumber].P2ID);
+    
+  });
+
+  socket.on('playTurn', function(data){
+    socket.broadcast.to(data.room).emit('turnPlayed', {
+      tile: data.tile,
+      room: data.room
+    });
+  });
+
+  socket.on('gameEnded', function(data){
+    socket.broadcast.to(data.room).emit('gameEnd', data);
+  });
+});
+
+
 
 function onError(error) {
   if (error.syscall !== 'listen') {
