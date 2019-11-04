@@ -12,8 +12,7 @@ router.get('/', function (req, res, next) {
 
 router.post('/login', (req, res, next) => {
 
-  passport.authenticate('local', { session: false }, (err, user, info) => {
-    console.log(user);
+  passport.authenticate('local', { session: false }, (err, user, info) => {    
     if (user === false) {
       res.json({ user, info })
     }

@@ -26,7 +26,6 @@ var server = http.createServer(app);
  */
 
 var io = require('socket.io')(server);
-var room = require('../models/room.model');
 
 
 server.listen(port);
@@ -63,8 +62,11 @@ var roomNumber = 0;
 var rooms = [
   {
     id:0,
+    turn:0,
     P1ID:null,
+    P1name:null,
     P2ID:null,
+    P2name:null,
   }
 ]
 
@@ -77,10 +79,19 @@ io.on('connection', function(socket){
     if(rooms[roomNumber].P1ID === null)
     {
       rooms[roomNumber].P1ID = data.id;
+
+      socket.join(`room-${roomNumber}`);
+      socket.emit('newGame', { name: data.name, room: `room-${roomNumber}` });
     }
     else if( rooms[roomNumber].P2ID === null)
     {
       rooms[roomNumber].P2ID = data.id;
+      // Kiểm tra xem phòng có bị giành mất không
+
+      socket.join(`room-${roomNumber}`);
+      socket.broadcast.to(`room-${roomNumber}`).emit('player1', {P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name, room: `room-${roomNumber}`});
+      socket.to(`room-${roomNumber}`).emit('player2', {P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name, room: `room-${roomNumber}` })
+
     }
     else
     {
@@ -88,28 +99,46 @@ io.on('connection', function(socket){
       rooms.push(
         {
           id:roomNumber,
+          turn:0,
           P1ID:null,
-          P2ID:null
+          P1name:null,
+          P2ID:null,
+          P2name:null,
         }
       );
       rooms[roomNumber].P1ID = data.id;
+
+      
+      socket.join(`room-${roomNumber}`);
+      socket.emit('newGame', { name: data.name, room: `room-${roomNumber}` });
     }
 
-    
-    socket.join(rooms[roomNumber].id);
-    socket.broadcast.to(rooms[roomNumber].id).emit('player1', rooms[roomNumber].P1ID);
-    socket.emit('player2', rooms[roomNumber].P2ID);
-    
   });
 
   socket.on('playTurn', function(data){
-    socket.broadcast.to(data.room).emit('turnPlayed', {
-      tile: data.tile,
-      room: data.room
-    });
+    if(rooms[roomNumber].P1ID === data.id && turn % 2 === 0)
+    {
+      socket.broadcast.to(`room-${roomNumber}`).emit('turnPlayed', {
+        pos: data.pos,
+        room: `room-${roomNumber}`,
+      });
+      rooms[roomNumber].turn++;
+    }
+    else if(rooms[roomNumber].P2ID === data.id && turn % 2 !== 0)
+    {
+      socket.broadcast.to(`room-${roomNumber}`).emit('turnPlayed', {
+        tile: data.pos,
+        room: `room-${roomNumber}`,
+      });
+      rooms[roomNumber].turn++;
+    }
+    else
+    {
+      // do nothing
+    }    
   });
 
-  socket.on('gameEnded', function(data){
+  socket.on('gameEnded', function(data){    
     socket.broadcast.to(data.room).emit('gameEnd', data);
   });
 });
