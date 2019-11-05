@@ -148,6 +148,11 @@ io.on('connection', function(socket){
     socket.broadcast.to(data.room).emit('handleDrawRequest', data);
   });
 
+  socket.on('answerDrawRequest',function(data){
+    socket.broadcast.to(data.room).emit('receiveDrawRequest',data);
+  })
+
+  // Give up request
   socket.on('sendGiveUpRequest',function(data){
     socket.broadcast.to(data.room).emit('handleGiveUpRequest', data);
   });
