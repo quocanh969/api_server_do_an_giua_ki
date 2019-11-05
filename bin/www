@@ -151,6 +151,11 @@ io.on('connection', function(socket){
   socket.on('sendGiveUpRequest',function(data){
     socket.broadcast.to(data.room).emit('handleGiveUpRequest', data);
   });
+
+  // Chat
+  socket.on('sendChatMessage',function(data){
+    socket.broadcast.to(data.room).emit('receiveChatMessage',data);
+  })
 });
 
 
