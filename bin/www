@@ -134,10 +134,16 @@ io.on('connection', function(socket){
     socket.broadcast.to(data.room).emit('gameEnd', data);
   });
 
+  // Undo request
   socket.on('sendUndoRequest',function(data){
     socket.broadcast.to(data.room).emit('handleUndoRequest', data);
   });
 
+  socket.on('answerUndoRequest',function(data){
+    socket.broadcast.to(data.room).emit('receiveUndoRequest',data);
+  })
+
+  // Draw request
   socket.on('sendDrawRequest',function(data){
     socket.broadcast.to(data.room).emit('handleDrawRequest', data);
   });
