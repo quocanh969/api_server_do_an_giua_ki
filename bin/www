@@ -80,8 +80,8 @@ io.on('connection', function(socket){
       rooms[roomNumber].P1ID = data.id;
       rooms[roomNumber].P1name = data.name;
 
-      socket.join(`room-${roomNumber}`);
-      socket.emit('newGame', {room: `room-${roomNumber}`});
+      socket.join(`${roomNumber}`);
+      socket.emit('newGame', {room: `${roomNumber}`});
     }
     else if( rooms[roomNumber].P2ID === null)
     {
@@ -90,7 +90,7 @@ io.on('connection', function(socket){
       // Kiểm tra xem phòng có bị giành mất không
 
       socket.join(`room-${roomNumber}`);   
-      socket.broadcast.to(`room-${roomNumber}`).emit('playerOne', {room:`room-${roomNumber}`,P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name});
+      socket.broadcast.to(`${roomNumber}`).emit('playerOne', {room:`${roomNumber}`,P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name});
     }
     else
     {
@@ -107,14 +107,14 @@ io.on('connection', function(socket){
       );
       rooms[roomNumber].P1ID = data.id;
       rooms[roomNumber].P1name = data.name;
-      socket.join(`room-${roomNumber}`);
-      socket.emit('newGame', {room:`room-${roomNumber}`});
+      socket.join(`${roomNumber}`);
+      socket.emit('newGame', {room:`${roomNumber}`});
     }
 
   });
 
   socket.on('noticeBeginMatch', function(data){
-    socket.broadcast.to(data.room).emit('playerTwo',{room:`room-${roomNumber}`,P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name});
+    socket.broadcast.to(data.room).emit('playerTwo',{room:`${roomNumber}`,P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name});
   });
 
 
@@ -156,6 +156,33 @@ io.on('connection', function(socket){
   // Chat
   socket.on('sendChatMessage',function(data){
     socket.broadcast.to(data.room).emit('receiveChatMessage',data);
+  });
+
+  socket.on('leaveServer',function(data){
+    console.log(data);
+    let num = parseInt(data.room);
+    if(data.player === 1)
+    {      
+      rooms[num].P1ID = null;
+      rooms[num].P1name = null;
+      if(rooms[num].P2ID !== null)
+      {
+        socket.broadcast.to(data.room).emit('handleGiveUpRequest',data);
+      }
+      else
+      {
+        if(num = roomNumber - 1)roomNumber = num;
+      }
+    }
+    else
+    {
+      rooms[num].P2ID = null;
+      rooms[num].P2name = null;
+      if(rooms[num].P1ID !== null)
+      {
+        socket.broadcast.to(data.room).emit('handleGiveUpRequest',data);
+      }      
+    }
   })
 });
 
