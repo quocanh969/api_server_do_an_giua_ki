@@ -89,9 +89,7 @@ io.on('connection', function(socket){
       rooms[roomNumber].P2name = data.name;
       // Kiểm tra xem phòng có bị giành mất không
 
-      socket.join(`room-${roomNumber}`);    
-      console.log('player one');
-      console.log(`room-${roomNumber}`);
+      socket.join(`room-${roomNumber}`);   
       socket.broadcast.to(`room-${roomNumber}`).emit('playerOne', {room:`room-${roomNumber}`,P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name});
     }
     else
@@ -116,8 +114,6 @@ io.on('connection', function(socket){
   });
 
   socket.on('noticeBeginMatch', function(data){
-    console.log('noticeBeginMatch');
-    console.log(data);
     socket.broadcast.to(data.room).emit('playerTwo',{room:`room-${roomNumber}`,P1: rooms[roomNumber].P1ID, P1name: rooms[roomNumber].P1name,P2: rooms[roomNumber].P2ID, P2name: rooms[roomNumber].P2name});
   });
 

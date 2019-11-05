@@ -21,5 +21,8 @@ module.exports = {
     },
     register:user=>{
         return db.add(user);
+    },
+    updateMatch:(id, user) => {
+        return db.load(`UPDATE USERs SET win="${user.win}", draw="${user.draw}", lost="${user.lost}" WHERE id=${id}; `);
     }
 }

@@ -55,6 +55,15 @@ router.post('/update-avatar', (req, res) => {
     
 });
 
-
+router.post('/update-match', (req,res) => {
+  param = req.body;
+  userModel.updateMatch(param.id,param.user)
+    .then((data) => {
+      res.json({ message: 'Update match success !!!', code: 1 });
+    })
+    .catch((error) => {
+      res.json({ message: 'Update match fail !!!', code: 0 });
+    });
+});
 
 module.exports = router;
