@@ -2,7 +2,7 @@ var mysql = require('mysql');
 
 var createConnection = () => {
     return mysql.createConnection({
-        /*
+        
         host: 'remotemysql.com',
         port: '3306',
         user: 'NgdWTXVp3P',
@@ -10,14 +10,15 @@ var createConnection = () => {
         database: 'NgdWTXVp3P',
         dateStrings: true,
         timezone: 'Z',
-        */
+        /*
         host: 'localhost',
         port: '3306',
         user: 'root',
         password: '1234',
         database: 'userInfo',
-        dateStrings: true,
+        dateStrings: true,        
         timezone: 'Z',
+        */
         typeCast: function castField(field, useDefaultTypeCasting) {
 
             if ((field.type === "BIT") && (field.length === 1)) {
